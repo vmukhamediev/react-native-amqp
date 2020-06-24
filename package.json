@@ -1,9 +1,9 @@
 {
   "author": {
-    "name": "Tim Honders"
+    "name": "Ko-ichi MAKITA"
   },
   "bugs": {
-    "url": "https://github.com/kegaretail/react-native-rabbitmq/issues"
+    "url": "https://github.com/kmakita13714/react-native-amqp/issues"
   },
   "bundleDependencies": false,
   "dependencies": {},
@@ -11,7 +11,7 @@
   "description": "A RabbitMq component for React Native.",
   "devDependencies": {},
   "directories": {},
-  "homepage": "https://github.com/kegaretail/react-native-rabbitmq",
+  "homepage": "https://github.com/kmakita13714/react-native-amqp",
   "keywords": [
     "react-native",
     "react",
@@ -21,17 +21,17 @@
   "main": "index.js",
   "maintainers": [
     {
-      "name": "timhonders",
-      "email": "tim.honders@kega.nl"
+      "name": "kmakita13714",
+      "email": "kmakita13714@gmail.com"
     }
   ],
-  "name": "react-native-rabbitmq",
+  "name": "react-native-amqp",
   "nativePackage": true,
   "optionalDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kegaretail/react-native-rabbitmq.git"
+    "url": "git+https://github.com/kmakita13714/react-native-amqp.git"
   },
   "scripts": {},
-  "version": "0.6.7"
+  "version": "1.0.0"
 }

@@ -5,6 +5,6 @@
 
 @interface RabbitMqDelegateLogger : NSObject <RMQConnectionDelegate>
 
-    - (nonnull id) init;
+- (nonnull id) init;
 
 @end

@@ -13,9 +13,9 @@ RCT_EXPORT_MODULE();
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     for (NSString *notificationName in [self supportedEvents]) {
         [center addObserver:self
-               selector:@selector(emitEventInternal:)
-                   name:notificationName
-                 object:nil];
+                   selector:@selector(emitEventInternal:)
+                       name:notificationName
+                     object:nil];
     }
 }
 
@@ -25,14 +25,13 @@ RCT_EXPORT_MODULE();
 
 - (void)emitEventInternal:(NSNotification *)notification {
     [self sendEventWithName:notification.name
-                   body:notification.userInfo];
+                       body:notification.userInfo];
 }
 
 + (void)emitEventWithName:(NSString *)name body:(NSDictionary *)body {
     [[NSNotificationCenter defaultCenter] postNotificationName:name
-                                                    object:self
-                                                  userInfo:body];
+                                                        object:self
+                                                      userInfo:body];
 }
-
 
 @end
