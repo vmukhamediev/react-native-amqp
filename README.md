@@ -7,24 +7,26 @@
 ## RN 0.60 >
 
 ## IOS
-npm install react-native-rabbitmq --save
+npm install --save react-native-amqp
 
 cd ./ios
 
 change in the Podfile line 1:
-platform :ios, '9.0' to platform :ios, '10.0'
+```
+platform :ios, '9.0' to platform :ios, '11.0'
+```
 
 pod install
 
 ## Android
 
-npm install react-native-rabbitmq --save
+npm install --save react-native-amqp
 
 ## RN 0.60 <
 
 ## IOS
 
-npm install react-native-rabbitmq --save
+npm install --save react-native-amqp
 
  Installation with CocoaPods
 
@@ -36,7 +38,7 @@ use_frameworks!
 2. Add the following to your Podfile, use master because needed fix is not a tag:
 
 ```
-pod 'react-native-rabbitmq', :path => '../node_modules/react-native-rabbitmq'
+pod 'react-native-amqp', :path => '../node_modules/react-native-amqp'
 pod 'RMQClient', :git => 'https://github.com/rabbitmq/rabbitmq-objc-client.git'
 ```
 3. Install the cocapods:
@@ -45,62 +47,19 @@ pod 'RMQClient', :git => 'https://github.com/rabbitmq/rabbitmq-objc-client.git'
 pod install
 ```
 
-
-
-In xcode add a recursive Header Search Path:
-```
-$(SRCROOT)/Pods
-```
-
-
-You need to change some things, to make it work:
-
-ios\Pods\RMQClient\RMQClient\RMQValues.h Line 53
-```
-@import JKVValue;
-```
-to
-```
-#import "JKVValue.h"
-```
-
-ios\Pods\JKVValue\JKVValue\Public\JKVValue.h
-```
-#import <JKVValue/JKVValueImpl.h>
-#import <JKVValue/JKVMutableValue.h>
-#import <JKVValue/JKVObjectPrinter.h>
-#import <JKVValue/JKVFactory.h>
-```
-to
-```
-#import "JKVValueImpl.h"
-#import "JKVMutableValue.h"
-#import "JKVObjectPrinter.h"
-#import "JKVFactory.h"
-```
-
-ios\Pods\RMQClient\RMQClient\RMQTCPSocketTransport.h
-```
-@import CocoaAsyncSocket;
-```
-to
-```
-#import "GCDAsyncSocket.h"
-```
-
 react-native link
 
 
 ## Android
 
-npm install react-native-rabbitmq --save
+npm install --save react-native-amqp
 
 react-native link
 
 
 ## Usage
 ```
-import { Connection, Exchange, Queue } from 'react-native-rabbitmq';
+import { Connection, Exchange, Queue } from 'react-native-amqp';
 
 const config = {
 	host:'',
