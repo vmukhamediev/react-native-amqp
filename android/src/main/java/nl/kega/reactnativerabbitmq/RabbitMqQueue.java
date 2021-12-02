@@ -28,15 +28,16 @@ public class RabbitMqQueue {
     public Boolean durable;
     public Boolean autodelete;
     public Boolean autoack;
+    public String exchangeName;
     public ReadableMap consumer_arguments;
-       
+
     private ReactApplicationContext context;
 
     private Channel channel;
     private RabbitMqExchange exchange;
 
     public RabbitMqQueue (ReactApplicationContext context, Channel channel, ReadableMap queue_config, ReadableMap arguments){
-       
+
         this.context = context;
         this.channel = channel;
 
@@ -45,9 +46,12 @@ public class RabbitMqQueue {
         this.durable = (queue_config.hasKey("durable") ? queue_config.getBoolean("durable") : true);
         this.autodelete = (queue_config.hasKey("autoDelete") ? queue_config.getBoolean("autoDelete") : false);
         this.autoack = (queue_config.hasKey("autoAck") ? queue_config.getBoolean("autoAck") : false);
+        this.exchangeName = (queue_config.hasKey("exchangeName") ? queue_config.getString("exchangeName") : "");
+        this.routing_key = (queue_config.hasKey("routingKey") ? queue_config.getString("routingKey") : "");
+        Boolean shouldCreate = (queue_config.hasKey("create") ? queue_config.getBoolean("create") : false);
 
         this.consumer_arguments = (queue_config.hasKey("consumer_arguments") ? queue_config.getMap("consumer_arguments") : null);
-     
+
         Map<String, Object> args = toHashMap(arguments);
 
         try {
@@ -55,10 +59,17 @@ public class RabbitMqQueue {
 
             Map<String, Object> consumer_args = toHashMap(this.consumer_arguments);
 
-            this.channel.queueDeclare(this.name, this.durable, this.exclusive, this.autodelete, args);
-            this.channel.basicConsume(this.name, this.autoack, consumer_args, consumer);
+            if (this.name == "") {
+                this.name = this.channel.queueDeclare().getQueue();
+            } else {
+                if (shouldCreate == true) {
+                    this.channel.queueDeclarePassive(this.name);
+                }
+            }
+            // this.channel.queueBind(this.name, this.exchangeName, this.routing_key);
+            this.channel.basicConsume(this.name, this.autoack, consumer);
 
-         
+
 
         } catch (Exception e){
             Log.e("RabbitMqQueue", "Queue error " + e);
@@ -74,7 +85,7 @@ public class RabbitMqQueue {
         this.context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("RabbitMqQueueEvent", message);
     }
 
-    public void bind(RabbitMqExchange exchange, String routing_key){ 
+    public void bind(RabbitMqExchange exchange, String routing_key){
         try {
             this.exchange = exchange;
             this.routing_key = (routing_key == "" ? this.name : routing_key);
@@ -86,27 +97,27 @@ public class RabbitMqQueue {
         }
     }
 
-    public void unbind(String routing_key){ 
+    public void unbind(String routing_key){
         try {
-  
+
             if (!this.exchange.equals(null)){
                 this.channel.queueUnbind(this.name, this.exchange.name, routing_key);
                 this.exchange = null;
             }
-            
+
         } catch (Exception e){
             Log.e("RabbitMqQueue", "Queue unbind error " + e);
             e.printStackTrace();
         }
     }
     /*
-    public void publish(String message, String routing_key){ 
+    public void publish(String message, String routing_key){
         try {
             byte[] message_body_bytes = message.getBytes();
 
             AMQP.BasicProperties properties = new AMQP.BasicProperties();
             //properties.setExpiration("60000");
-       
+
             this.channel.basicPublish(this.exchange_name, routing_key, properties, message_body_bytes);
         } catch (Exception e){
             Log.e("RabbitMqQueue", "Queue publish error " + e);
@@ -114,10 +125,10 @@ public class RabbitMqQueue {
         }
     }
     */
-    public void purge(){ 
+    public void purge(){
         try {
-            //this.channel.queuePurge(this.name, true); 
-            
+            //this.channel.queuePurge(this.name, true);
+
             WritableMap event = Arguments.createMap();
             event.putString("name", "purged");
             event.putString("queue_name", this.name);
@@ -127,12 +138,12 @@ public class RabbitMqQueue {
             Log.e("RabbitMqQueue", "Queue purge error " + e);
             e.printStackTrace();
         }
-    } 
+    }
 
-    public void delete(){ 
+    public void delete(){
         try {
-            this.channel.queueDelete(this.name); 
-            
+            this.channel.queueDelete(this.name);
+
             WritableMap event = Arguments.createMap();
             event.putString("name", "deleted");
             event.putString("queue_name", this.name);
@@ -142,7 +153,7 @@ public class RabbitMqQueue {
             Log.e("RabbitMqQueue", "Queue delete error " + e);
             e.printStackTrace();
         }
-    } 
+    }
 
 
     private Map<String, Object> toHashMap(ReadableMap data){
@@ -197,8 +208,8 @@ public class RabbitMqQueue {
         } catch (AlreadyClosedException e){
             Log.e("RabbitMqQueue AlreadyClosedException", "basicAck " + e);
             e.printStackTrace();
-        } 
-  
+        }
+
     }
 
 }
