@@ -4,6 +4,7 @@
     @property (nonatomic, readwrite) NSString *name;
     @property (nonatomic, readwrite) NSDictionary *config;
     @property (nonatomic, readwrite) RMQQueue *queue;
+    @property (nonatomic, readwrite) RMQExchange *exchange;
     @property (nonatomic, readwrite) id<RMQChannel> channel;
     @property (nonatomic, readwrite) RMQQueueDeclareOptions options;
     @property (nonatomic, readwrite) RCTBridge *bridge;
@@ -19,6 +20,9 @@ RCT_EXPORT_MODULE();
         self.config = config;
         self.channel = channel;
         self.name = [config objectForKey:@"name"];
+        NSString *routingKey = [config objectForKey:@"routingKey"] != nil ? [config objectForKey:@"routingKey"] : @"";
+        NSString *exchangeName = [config objectForKey:@"exchangeName"] != nil  ? [config objectForKey:@"exchangeName"] : @"";
+        bool shouldCreate = [config objectForKey:@"create"] != nil ? [[config objectForKey:@"create"] boolValue] : false;
 
         self.options = RMQQueueDeclareNoOptions;
 
@@ -42,7 +46,19 @@ RCT_EXPORT_MODULE();
             self.options = self.options | RMQQueueDeclareNoWait;
         }
 
-        self.queue = [self.channel queue:self.name options:RMQQueueDeclarePassive];
+        if (shouldCreate) {
+            self.queue = [self.channel queue:@"" options:RMQExchangeDeclareAutoDelete];
+        } else {
+            self.queue = [self.channel queue:self.name options:RMQQueueDeclarePassive];
+        }
+
+        if ([exchangeName length] != 0) {
+            self.exchange = [self.channel direct:exchangeName options:RMQExchangeDeclarePassive];
+        }
+
+        if (self.exchange != nil) {
+            [self.queue bind:self.exchange routingKey:routingKey];
+        }
 
         NSMutableDictionary *tmp_arguments = [[NSMutableDictionary alloc] init];
         if ([config objectForKey:@"consumer_arguments"] != nil) {
@@ -73,7 +89,7 @@ RCT_EXPORT_MODULE();
                                       handler:^(RMQMessage * _Nonnull message) {
             NSString *body = [[NSString alloc] initWithData:message.body encoding:NSUTF8StringEncoding];
 
-            //[self.channel ack:message.deliveryTag];
+            // [self.channel ack:message.deliveryTag];
 
             [EventEmitter
                 emitEventWithName:@"RabbitMqQueueEvent"

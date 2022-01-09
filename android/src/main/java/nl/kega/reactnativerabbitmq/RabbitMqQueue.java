@@ -59,17 +59,16 @@ public class RabbitMqQueue {
 
             Map<String, Object> consumer_args = toHashMap(this.consumer_arguments);
 
-            if (this.name == "") {
+            if (this.name.isEmpty()) {
                 this.name = this.channel.queueDeclare().getQueue();
             } else {
                 if (shouldCreate == true) {
                     this.channel.queueDeclarePassive(this.name);
                 }
             }
-            // this.channel.queueBind(this.name, this.exchangeName, this.routing_key);
+
+            if (!this.exchangeName.isEmpty()) this.channel.queueBind(this.name, this.exchangeName, this.routing_key);
             this.channel.basicConsume(this.name, this.autoack, consumer);
-
-
 
         } catch (Exception e){
             Log.e("RabbitMqQueue", "Queue error " + e);
