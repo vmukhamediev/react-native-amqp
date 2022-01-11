@@ -25,7 +25,7 @@
       "email": "kmakita13714@gmail.com"
     }
   ],
-  "name": "react-native-amqp",
+  "name": "@vmukhamediev/react-native-amqp",
   "nativePackage": true,
   "optionalDependencies": {},
   "repository": {
