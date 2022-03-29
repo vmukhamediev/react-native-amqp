@@ -1,4 +1,5 @@
 #import "RabbitMqQueue.h"
+#import <Foundation/Foundation.h>
 
 @interface RabbitMqQueue ()
     @property (nonatomic, readwrite) NSString *name;
@@ -16,6 +17,7 @@
 RCT_EXPORT_MODULE();
 
 -(id)initWithConfig:(NSDictionary *)config channel:(id<RMQChannel>)channel {
+@try {
     if (self = [super init]) {
         self.config = config;
         self.channel = channel;
@@ -107,6 +109,10 @@ RCT_EXPORT_MODULE();
         }];
     }
 
+    }
+    @catch(NSError *error) {
+        [EventEmitter emitEventWithName:@"RabbitMqConnectionEvent" body:@{@"name": @"error", @"type": @"RabbitMqQueue error",  @"code": [NSString stringWithFormat:@"%ld", error.code], @"description": [error localizedFailureReason]}];
+    }
     return self;
 }
 
