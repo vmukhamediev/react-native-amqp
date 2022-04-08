@@ -73,6 +73,18 @@ public class RabbitMqQueue {
         } catch (Exception e){
             Log.e("RabbitMqQueue", "Queue error " + e);
             e.printStackTrace();
+
+            WritableMap event = Arguments.createMap();
+            event.putString("name", "error");
+            event.putString("type", "Queue connection fail");
+            event.putString("code", "");
+            if (e.getCause() == null) {
+                event.putString("description", e.getMessage());
+            } else {
+                event.putString("description", e.getCause().getMessage());
+            }
+
+            this.context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("RabbitMqConnectionEvent", event);
         }
     }
 
