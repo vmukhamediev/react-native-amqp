@@ -32,6 +32,7 @@ RCT_EXPORT_METHOD(connect)
         protocol = @"amqps";
     }
 
+    NSString *uri = [NSString stringWithFormat:@"%@://%@:%@@%@:%@/%@", protocol, self.config[@"username"], self.config[@"password"], self.config[@"host"], self.config[@"port"], self.config[@"virtualhost"]];
     RabbitMqDelegateLogger *delegate = [[RabbitMqDelegateLogger alloc] init];
     self.connection = [[RMQConnection alloc] initWithUri:uri
                                               tlsOptions:[RMQTLSOptions fromURI:uri verifyPeer:false]
