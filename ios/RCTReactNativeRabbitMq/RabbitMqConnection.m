@@ -32,20 +32,20 @@ RCT_EXPORT_METHOD(connect)
         protocol = @"amqps";
     }
 
-    NSString *uri = [NSString stringWithFormat:@"%@://%@:%@@%@:%@/%@", protocol, self.config[@"username"], self.config[@"password"], self.config[@"host"], self.config[@"port"], self.config[@"virtualhost"]];        
     RabbitMqDelegateLogger *delegate = [[RabbitMqDelegateLogger alloc] init];
-    self.connection = [[RMQConnection alloc] initWithUri:uri 
-                                              channelMax:@65535 
-                                                frameMax:@(RMQFrameMax) 
+    self.connection = [[RMQConnection alloc] initWithUri:uri
+                                              tlsOptions:[RMQTLSOptions fromURI:uri verifyPeer:false]
+                                              channelMax:@65535
+                                                frameMax:@(RMQFrameMax)
                                                heartbeat:@10
 										  connectTimeout:@15
 											 readTimeout:@30
 										    writeTimeout:@30
-                                             syncTimeout:@10 
+                                             syncTimeout:@10
                                                 delegate:delegate
                                            delegateQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
 
-    [self.connection start:^{ 
+    [self.connection start:^{
         self.connected = true;
 
         [EventEmitter emitEventWithName:@"RabbitMqConnectionEvent" body:@{@"name": @"connected"}];
@@ -59,11 +59,11 @@ RCT_EXPORT_METHOD(close)
     for (id q in self.queues) {
         [q cancelConsumer];
     }
-    
+
     [self.connection close];
     [self.queues removeAllObjects];
     [self.exchanges removeAllObjects];
-    
+
     self.connected = false;
     self.connection = nil;
 }
@@ -85,7 +85,7 @@ RCT_EXPORT_METHOD(bindQueue:(NSString *)exchange_name queue_name:(NSString *)que
     if (queue_id != nil && exchange_id != nil) {
         [queue_id bind:exchange_id routing_key:routing_key];
     }
-    
+
 }
 
 RCT_EXPORT_METHOD(unbindQueue:(NSString *)exchange_name queue_name:(NSString *)queue_name routing_key:(NSString *)routing_key)
@@ -128,7 +128,7 @@ RCT_EXPORT_METHOD(cancelConsumer:(NSString *)queue_name)
 RCT_EXPORT_METHOD(addExchange:(NSDictionary *) config)
 {
     RMQExchangeDeclareOptions options = RMQExchangeDeclareNoOptions;
-    
+
     if ([config objectForKey:@"passive"] != nil && [[config objectForKey:@"passive"] boolValue]) {
         options = options | RMQExchangeDeclarePassive;
     }
@@ -155,7 +155,7 @@ RCT_EXPORT_METHOD(addExchange:(NSDictionary *) config)
     } else if ([type isEqualToString:@"topic"]) {
         exchange = [self.channel topic:[config objectForKey:@"name"] options:options];
     }
-    
+
     if (exchange != nil){
         [self.exchanges addObject:exchange];
     }
